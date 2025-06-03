@@ -1,0 +1,574 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calcolatore Ottica Bianchi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@900&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { background:#f6f9fb; color:#0e2238; font-family: 'Montserrat', Arial, sans-serif; margin:0; }
+    .main-container { max-width: 570px; margin: 32px auto 0 auto; background: #fff; border-radius: 18px; box-shadow: 0 6px 36px #c7e5fb26; padding: 38px 30px 30px 30px; }
+    .step { display:none; }
+    .step.active { display:block; animation: fadein .6s; }
+    @keyframes fadein { from {opacity:0;} to {opacity:1;} }
+    .hero-title { font-family:'Roboto',Arial,sans-serif; font-size:2.19rem; font-weight:900; color:#014c96; margin-bottom:13px; line-height:1.18;}
+    .hero-badge { background: #ffd700; color:#2a393a; border-radius:7px; font-weight:800; font-size:1.08rem; display:inline-block; padding:6px 14px 5px 14px; letter-spacing:0.02em; margin-bottom:19px;}
+    .hero-sub { font-size:1.13rem; color:#203357; margin-bottom:21px;}
+    .hero-why { font-size:1.13rem; color:#014c96; font-weight:600; background:#e7f6ff; border-radius:10px; padding:13px 14px 12px 14px; margin-bottom:22px; border-left:4px solid #ffd700;}
+    .time-badge { background: #e8f4fd; color:#014c96; border-radius:20px; font-weight:700; font-size:0.95rem; display:inline-block; padding:4px 12px; margin-bottom:16px; border: 1px solid #b3d4f1;}
+    .cta-main { background:#014c96; color:#fff; border:none; border-radius:34px; padding:17px 42px; font-size:1.13rem; font-weight:800; box-shadow: 0 3px 17px #97c5f5ad; margin-top:16px; cursor:pointer; }
+    .nav-btns { display:flex; justify-content:space-between; margin-top:28px;}
+    .btn { background:#f3f7fc; color:#014c96; border:none; border-radius:22px; padding:12px 32px; font-size:1.08rem; font-weight:700; cursor:pointer; }
+    .btn[disabled] { opacity:0.43; cursor:not-allowed; }
+    .input-label { font-size:1.09rem; font-weight:700; margin-bottom:6px; display:block;}
+    .input-text, .select-text { width:100%; font-size:1.13rem; padding:12px 9px; border-radius:10px; border:1.5px solid #b7cbe1; margin-bottom:4px; box-sizing: border-box;}
+    .select-text { background:#fff; }
+    .radio-group, .gender-group, .profilo-group { display:flex; gap:16px; margin-top:7px; flex-wrap:wrap;}
+    .radio-label, .gender-label, .profilo-label { font-size:1.08rem; cursor:pointer; background:#f6f9fb; border-radius:15px; padding:11px 17px 10px 13px; border:1.5px solid #c5d7ea; margin-bottom:7px; transition: background 0.15s; }
+    .radio-label input, .gender-label input, .profilo-label input {margin-right:6px;}
+    .radio-label.selected, .gender-label.selected, .profilo-label.selected {background:#ddeafc; border-color:#014c96;}
+    .slider-group { margin:22px 0 16px 0;}
+    .slider-label { margin-bottom:7px; font-weight:600; }
+    .slider-wrap { display:flex; align-items:center; gap:15px;}
+    .slider-ticks { display:flex; justify-content:space-between; font-size:1rem; margin-top:3px; color:#016cc6; position:relative;}
+    .slider-ticks span { position:absolute; left:0; transform:translateX(-50%); }
+    .slider-ticks span:nth-child(1) { left:0%; }
+    .slider-ticks span:nth-child(2) { left:25%; }
+    .slider-ticks span:nth-child(3) { left:50%; }
+    .slider-ticks span:nth-child(4) { left:75%; }
+    .slider-ticks span:nth-child(5) { left:100%; }
+    .summary-cost { background:#f5f9ff; border-radius:13px; padding:17px 15px 13px 15px; margin-bottom:13px; text-align:center;}
+    .summary-cost span {font-size:1.14rem; font-weight:800; color:#014c96;}
+    .graph-bar-wrap {margin:14px 0 13px 0;}
+    .graph-section {margin-bottom:32px; border-bottom:1px solid #d8e6f7; padding-bottom:17px;}
+    .graph-section:last-child {border-bottom:none;}
+    .graph-bar-labels {display:flex; justify-content:space-between; font-size:0.98rem; color:#203357; margin-bottom:2px;}
+    .graph-bar { height: 26px; background: linear-gradient(90deg,#ffb400,#fdc43b 70%,#ffe8a5); border-radius:14px; margin-bottom:12px; position:relative; }
+    .graph-bar.blue {background:linear-gradient(90deg,#237bdc 0%,#b2daff 80%);}
+    .graph-bar.red {background:linear-gradient(90deg,#c01b1b 0%,#ffc3b2 90%);}
+    .graph-bar.green {background:linear-gradient(90deg,#22b16b 0%,#afffc2 80%);}
+    .graph-bar.gold {background:linear-gradient(90deg,#ffb400,#fdc43b 70%,#ffe8a5);}
+    .graph-value { position:absolute; right:14px; top:4px; font-weight:700; color:#1c223b;}
+    .final-cta { background:#ffe18f; border-radius:12px; color:#1451a2; font-weight:800; font-size:1.13rem; padding:17px 13px 15px 17px; margin:19px 0 10px 0; border:1px solid #ffe7b8;}
+    .email-row { margin:13px 0 0 0;}
+    .progress-bar { width:100%; height:9px; border-radius:7px; background:#e7f2fb; margin-bottom:27px; overflow:hidden;}
+    .progress { height:100%; border-radius:7px; background:linear-gradient(90deg,#ffc800,#0066b2); width:0; transition:width 0.4s;}
+    .checkbox-group {display:flex;flex-direction:column;gap:7px;margin:10px 0;}
+    .checkbox-label {font-size:1.05rem; cursor:pointer; display:flex; align-items:center;}
+    .checkbox-label input {margin-right:8px;}
+    .checkbox-label.selected { background: #ddeafc; border-color: #014c96;}
+    @media (max-width:600px) {
+        .main-container { padding:14px 6vw 16px 6vw;}
+        .hero-title {font-size:1.12rem;}
+        .input-label {font-size:0.97rem;}
+        .slider-ticks span {font-size:0.91rem;}
+    }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <div class="progress-bar"><div class="progress" id="progressStep" style="width:0%"></div></div>
+
+
+<!-- STEP 0: HERO SECTION -->
+<div class="step active" id="step0">
+  <div class="hero-badge">👓 Calcolatore Vista Perfetta</div>
+  <div class="hero-title">Progressivi a 69€? 2 paia a 99€?<br>La verità che le catene non ti diranno MAI.</div>
+  <div class="hero-hook" style="font-size:1.18rem; color:#d16910; font-weight:700; margin-bottom:17px;">
+    Offerte civetta, prezzi da mercatino dell'usato… ti sembra davvero possibile avere una Ferrari al prezzo di una Mini-car?
+  </div>
+  <div class="hero-sub" style="font-size:1.13rem; color:#203357; margin-bottom:24px; line-height:1.57;">
+    Ciao, sono <b>Enrico Bianchi</b>, titolare di Ottica Bianchi e optometrista con 30 anni di esperienza e oltre 28.000 controlli della vista alle spalle.<br><br>
+    <span style="color:#d16910;font-weight:600;">Risparmiare sugli occhiali è l'errore che paghi tutti i giorni, per anni.</span><br>
+    Ti costano mal di testa, occhi rossi, ore perse e una vita vissuta a metà.<br><br>
+    Per i denti, la palestra, l'udito… cerchi il meglio e ti affidi all'esperto.<br>
+    Per la vista invece, spesso, cadi nella trappola del prezzo da volantino.<br>
+  </div>
+  <div class="hero-why">
+    <span style="color:#b87000;">La vista è il senso più importante che hai.</span> <br>
+    Eppure è l'unico per cui cerchiamo il risparmio a scapito della qualità.<br>
+    <b>Oggi ti mostro perché è la scelta peggiore che puoi fare.</b>
+  </div>
+  <div class="time-badge">⏱ Tempo richiesto: meno di 5 minuti</div>
+  <button class="cta-main" id="startCalcBtn" style="display:block; width:100%; padding:18px 0; font-size:1.17rem; font-weight:900; margin:36px 0 0 0; transition: background .19s; letter-spacing:0.01em;">
+    Scopri la verità in 5 minuti →
+  </button>
+</div>
+
+
+<!-- STEP 1: DATI PERSONALI -->
+<div class="step" id="step1">
+  <div class="input-label">Come ti chiami?</div>
+  <input type="text" class="input-text" id="nome" maxlength="32" autocomplete="off" placeholder="Scrivi il tuo nome…">
+  <div class="input-label" style="margin-top:22px;">Quanti anni hai? <span style="font-weight:400; color:#3e5771; font-size:0.97em;">(Te lo chiedo solo per consigliarti meglio!)</span></div>
+  <div class="radio-group" id="etaGroup">
+    <label class="radio-label"><input type="radio" name="eta" value="18-40"> 18-40</label>
+    <label class="radio-label"><input type="radio" name="eta" value="41-55"> 41-55</label>
+    <label class="radio-label"><input type="radio" name="eta" value="56-70"> 56-70</label>
+    <label class="radio-label"><input type="radio" name="eta" value="oltre70"> Oltre 70</label>
+  </div>
+  <div class="input-label" style="margin-top:20px;">Che lavoro fai?<span style="font-weight:400; color:#3e5771; font-size:0.97em;"> (Ci aiuta a capire come proteggere meglio la tua vista)</span></div>
+  <select class="select-text" id="professione">
+    <option value="">Seleziona…</option>
+    <option value="impiegato">Impiegato</option>
+    <option value="libero professionista">Libero professionista</option>
+    <option value="conduttore mezzi pesanti">Conduttore di mezzi pesanti</option>
+    <option value="freelancer digitale">Freelancer digitale</option>
+    <option value="studente">Studente</option>
+    <option value="operatore sanitario">Operatore sanitario</option>
+    <option value="insegnante">Insegnante</option>
+    <option value="addetto vendita">Commesso/Addetto vendita</option>
+    <option value="artigiano/operaio">Artigiano/Operaio</option>
+    <option value="casalinga">Casalinga</option>
+    <option value="disoccupato">Disoccupato</option>
+    <option value="pensionato">Pensionato</option>
+    <option value="altro">Altro</option>
+  </select>
+  <div id="altroLavoroDiv" style="display:none; margin-top:7px;">
+    <input type="text" class="input-text" id="altroLavoro" maxlength="32" autocomplete="off" placeholder="Specifica il tuo lavoro…">
+  </div>
+  <div class="input-label" style="margin-top:20px;">Uomo, donna, o preferisci non rispondere?</div>
+<div class="gender-group" id="genereGroup">
+  <label class="gender-label"><input type="radio" name="genere" value="uomo"> Uomo</label>
+  <label class="gender-label"><input type="radio" name="genere" value="donna"> Donna</label>
+  <label class="gender-label"><input type="radio" name="genere" value="n.r."><span style="font-size:0.97em; font-weight:400;">Preferisco non rispondere</span></label>
+</div>
+
+
+  <div class="nav-btns">
+    <span></span>
+    <button class="btn" id="step1Next" disabled>Avanti</button>
+  </div>
+</div>
+
+
+<!-- STEP 2: USO PREVALENTE -->
+<div class="step" id="step2">
+  <div class="input-label">Come usi di più i tuoi occhiali? <span style="font-weight:400; color:#3e5771;">(così capiamo cosa davvero conta per te)</span></div>
+  <div class="profilo-group" id="profiloGroup" style="flex-wrap:wrap;">
+    <label class="profilo-label" data-desc="Passi almeno 6 ore al giorno davanti a PC, tablet o smartphone per lavoro o studio"><input type="radio" name="profilo" value="Digitale">💻 Lavoro al PC/tablet</label>
+    <label class="profilo-label" data-desc="Usi molto l'auto, anche di sera, per lavoro, famiglia o tempo libero"><input type="radio" name="profilo" value="Guida">🚗 Guida frequente</label>
+    <label class="profilo-label" data-desc="Sei spesso all'aperto, lavori al sole o in ambienti molto luminosi"><input type="radio" name="profilo" value="Outdoor">🌞 Lavoro/vita all'aperto</label>
+    <label class="profilo-label" data-desc="Fai un po' di tutto: lavori in negozio, in aula, ti sposti molto"><input type="radio" name="profilo" value="Mix">🔄 Un po' di tutto</label>
+  </div>
+  <div id="profiloDesc" style="font-size:0.99rem;color:#225194;margin-top:7px;min-height:28px;"></div>
+  <div class="nav-btns">
+    <button class="btn" onclick="prevStep()">Indietro</button>
+    <button class="btn" id="step2Next" disabled>Avanti</button>
+  </div>
+</div>
+
+
+<!-- STEP 3: PROBLEMI AVUTI -->
+<div class="step" id="step3">
+  <div class="input-label" style="font-size:1.11rem; margin-bottom:7px;">Negli ultimi anni, ti è mai capitato di…?</div>
+  <div class="checkbox-group" id="problemiGroup">
+    <label class="checkbox-label"><input type="checkbox" value="maldi">Soffrire di mal di testa frequenti</label>
+    <label class="checkbox-label"><input type="checkbox" value="colliri">Usare spesso colliri per occhi stanchi/rossi</label>
+    <label class="checkbox-label"><input type="checkbox" value="massaggi">Aver bisogno di massaggi per dolori cervicali o alla schiena</label>
+    <label class="checkbox-label"><input type="checkbox" value="analgesici">Prendere analgesici per dolori alla testa/collo</label>
+    <label class="checkbox-label"><input type="checkbox" value="oreperse">Perdere ore di lavoro (o giornate) per stanchezza agli occhi</label>
+    <label class="checkbox-label"><input type="checkbox" value="nessuno">Nessuno di questi</label>
+  </div>
+  <div style="font-size:0.98rem;color:#4768ad; margin-top:6px; margin-bottom:12px;">
+  <b>Cosa sono i costi indiretti?</b><br>
+  Usare occhiali non adatti o lenti obsolete può causare mal di testa, occhi stanchi, dolori cervicali, perdita di produttività e la necessità di farmaci o massaggi.<br>
+  Ecco una stima dei <b>costi annui e mensili</b> che potresti sostenere:
+</div>
+<table style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+  <thead>
+    <tr style="background:#e8f4fd;">
+      <th style="text-align:left; padding:6px 8px; font-size:1em;">Voce</th>
+      <th style="text-align:right; padding:6px 8px; font-size:1em;">€/anno</th>
+      <th style="text-align:right; padding:6px 8px; font-size:1em;">€/mese</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:6px 8px;">Mal di testa da lenti obsolete/non aggiornate</td>
+      <td style="text-align:right; padding:6px 8px;">50</td>
+      <td style="text-align:right; padding:6px 8px;">4,2</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 8px;">Colliri per occhi stanchi o irritati</td>
+      <td style="text-align:right; padding:6px 8px;">50</td>
+      <td style="text-align:right; padding:6px 8px;">4,2</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 8px;">Massaggi cervicali/posturali</td>
+      <td style="text-align:right; padding:6px 8px;">300</td>
+      <td style="text-align:right; padding:6px 8px;">25</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 8px;">Analgesici per dolori alla testa/collo</td>
+      <td style="text-align:right; padding:6px 8px;">30</td>
+      <td style="text-align:right; padding:6px 8px;">2,5</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 8px;">Ore/giorni di lavoro persi</td>
+      <td style="text-align:right; padding:6px 8px;">500</td>
+      <td style="text-align:right; padding:6px 8px;">41,7</td>
+    </tr>
+  </tbody>
+</table>
+<div style="font-size:0.96rem; color:#1b3555; margin-bottom:3px;">
+  <b>Questi sono costi reali, che spesso si presentano solo perché si risparmia sugli occhiali o si scelgono lenti sbagliate.<br>
+  Non sono solo soldi, ma qualità della vita, comfort e salute ogni giorno.</b>
+</div>
+  <div class="nav-btns">
+    <button class="btn" onclick="prevStep()">Indietro</button>
+    <button class="btn" id="step3Next">Avanti</button>
+  </div>
+</div>
+
+
+<!-- STEP 4: OCCHIALE PREMIUM PRESENTAZIONE FORTE -->
+<div class="step" id="step4">
+  <div class="input-label" style="font-size:1.22rem; margin-bottom:10px;">
+    Perché abbiamo scelto il meglio: l'Occhiale Progressivo Premium
+  </div>
+  <div style="font-size:1.09rem; color:#244566; margin-bottom:16px;">
+    Nessun compromesso, nessun trucco, nessuna "offerta civetta".<br>
+    <b>Abbiamo scelto di calcolare il valore di un occhiale progressivo premium vero, senza rinunce, perché:</b>
+    <ul style="margin:8px 0 14px 18px;">
+      <li><b>Solo le migliori lenti personalizzate</b> ti garantiscono una visione naturale in ogni situazione, senza limiti di distanza o postura.</li>
+      <li><b>Solo una montatura brandizzata di qualità</b> protegge il tuo investimento per anni, mantenendo comfort e stile.</li>
+      <li><b>Solo un vero servizio professionale pre e post vendita</b> ti offre un risultato garantito, sicuro e senza sorprese.</li>
+    </ul>
+  </div>
+  <div style="background:#e7f6ff; border-left:5px solid #ffd700; border-radius:9px; padding:15px 18px 14px 18px; margin-bottom:16px;">
+    <b>Cosa rende unico il nostro servizio?</b><br>
+    <ul style="margin:8px 0 8px 14px; padding-left:8px;">
+      <li><b>Pre-vendita:</b> <span style="color:#014c96;">Controllo della vista ultra-approfondito</span> (fino a 45 minuti), non le solite visite rapide da 15-20 minuti "tanto per fare". Studiamo davvero i tuoi bisogni e ti dedichiamo tempo e attenzione.</li>
+      <li><b>Alla consegna:</b> <span style="color:#014c96;">Guida e training all'adattamento</span> con i nostri esperti, per aiutarti a usare subito e al meglio le nuove lenti, senza frustrazione o errori.</li>
+      <li><b>Post-vendita:</b> <span style="color:#014c96;">Sondaggio di soddisfazione</span> per seguirti anche dopo l'acquisto e <b>garanzia reale di 2 anni</b>, senza scuse.</li>
+    </ul>
+  </div>
+  <div style="font-size:1.08rem; color:#b87000; margin-bottom:12px;">
+    Il prezzo? <b>1000 euro</b>. Ma ora ti facciamo vedere quanto (e perché) questa scelta è la più intelligente e conveniente nel tempo.<br>
+    Preparati a cambiare per sempre il modo in cui pensi ai tuoi occhiali!
+  </div>
+  <div class="nav-btns">
+    <button class="btn" onclick="prevStep()">Indietro</button>
+    <button class="btn" id="step4Next">Avanti</button>
+  </div>
+</div>
+
+
+<!-- STEP 5: SLIDER ANNI & ORE -->
+<div class="step" id="step5">
+<div style="font-size:1.08rem; color:#244566; margin-bottom:18px;">
+  Un paio di occhiali li indossi per molte ore, tutti i giorni, per diversi anni: lavorando, leggendo, guidando, vivendo la tua quotidianità. Un impianto dentale lo "usi" solo per masticare, poche ore al giorno. La differenza, nella vita reale, è enorme.
+</div>
+  <div class="slider-group">
+    <div class="slider-label">Per quanti anni useresti questi occhiali?</div>
+    <div class="slider-wrap">
+      <input type="range" id="anniSlider" min="2" max="6" value="4" step="1" style="width:85%;">
+      <span id="anniVal" style="font-size:1.12rem;min-width:28px;">4</span> anni
+    </div>
+    <div class="slider-ticks" style="position:relative; width:85%; margin-left:4px; margin-bottom:12px;">
+      <span style="left:0%">2</span>
+      <span style="left:25%">3</span>
+      <span style="left:50%">4</span>
+      <span style="left:75%">5</span>
+      <span style="left:100%">6</span>
+    </div>
+  </div>
+  <div class="slider-group">
+    <div class="slider-label">Quante ore al giorno li indosseresti?</div>
+    <div class="slider-wrap">
+      <input type="range" id="oreSlider" min="12" max="18" value="16" step="1" style="width:85%;">
+      <span id="oreVal" style="font-size:1.12rem;min-width:24px;">16</span> ore
+    </div>
+    <div class="slider-ticks" style="position:relative; width:85%; margin-left:4px;">
+      <span style="left:0%">12</span>
+      <span style="left:16.6%">13</span>
+      <span style="left:33.2%">14</span>
+      <span style="left:49.8%">15</span>
+      <span style="left:66.4%">16</span>
+      <span style="left:83%">17</span>
+      <span style="left:100%">18</span>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn" onclick="prevStep()">Indietro</button>
+    <button class="btn" id="step5Next">Calcola il costo →</button>
+  </div>
+</div>
+
+
+<!-- STEP 6: COSTI - VERSIONE IMPATTANTE -->
+<div class="step" id="step6">
+  <div class="input-label" style="font-size:1.27rem; color:#014c96; margin-bottom:10px;">
+    <span style="background:#ffd700; color:#2a393a; padding:4px 13px; border-radius:8px; font-weight:900;">
+      ECCO LA VERA SORPRESA
+    </span>
+  </div>
+  <div style="font-size:1.14rem; color:#b87000; font-weight:700; margin-bottom:10px;">
+    Un occhiale progressivo premium da 1000€...<br>
+    <span style="color:#c90000; font-size:1.15em; font-weight:900;">TI COSTA MENO DI UN CAFFÈ AL GIORNO!</span>
+  </div>
+  <div class="summary-cost" style="margin-bottom:18px; font-size:1.14rem; font-weight:800; background:#fff6e5; border:2px solid #ffd700;">
+    <div style="margin-bottom:11px;">
+      <span style="font-size:1.3rem; color:#b87000;">Quanto ti costa davvero?</span>
+    </div>
+    <div style="font-size:2.1rem; color:#014c96; margin-bottom:7px;">
+      <span style="display:inline-block; min-width:140px;">€ <span id="costoGiorno" style="font-size:2.1rem; font-weight:900;"></span></span>
+      <span style="font-size:1.13rem; color:#555;">al giorno</span>
+    </div>
+    <div style="display:flex; justify-content:space-between; gap:13px; font-size:1.11rem; margin-bottom:3px;">
+      <span>All’ora: <b style="color:#0150b5; font-size:1.17em;"><span id="costoOra"></span> €</b></span>
+      <span>Al mese: <b style="color:#0150b5; font-size:1.17em;"><span id="costoMese"></span> €</b></span>
+      <span>All’anno: <b style="color:#0150b5; font-size:1.17em;"><span id="costoAnno"></span> €</b></span>
+    </div>
+  </div>
+  <div style="font-size:1.13rem; color:#c14910; margin-bottom:9px;">
+    Per meno di un caffè al giorno ti godi <b>il massimo comfort visivo</b> e lasci alle spalle i problemi di occhiali “economici”!
+  </div>
+  <div style="font-size:1.09rem; color:#014c96; background:#e7f6ff; padding:10px 15px 8px 15px; border-radius:7px; margin-bottom:17px;">
+    <b>Resta con noi:</b> ora ti facciamo vedere il confronto con tutte le spese che sostieni ogni mese.<br>
+    Preparati, perché scoprirai che gli occhiali premium sono tra le scelte più accessibili… e sensate!
+  </div>
+  <div id="costiIndirettiMsg" style="font-size:1.08rem; color:#c14910; margin-bottom:8px;"></div>
+  <div class="nav-btns">
+    <button class="btn" onclick="prevStep()">Indietro</button>
+    <button class="btn" id="step6Next">Confronta le spese →</button>
+  </div>
+</div>
+
+
+<!-- STEP 7: GRAFICI CONFRONTO SUPER IMPATTANTE -->
+<div class="step" id="step7">
+  <div class="input-label" style="font-size:1.27rem; color:#014c96; margin-bottom:10px;">
+    <span style="background:#ffd700; color:#2a393a; padding:4px 13px; border-radius:8px; font-weight:900;">
+      LE TUE SPESE A CONFRONTO
+    </span>
+  </div>
+  <div style="font-size:1.15rem; color:#b87000; font-weight:700; margin-bottom:8px;">
+    Guarda bene: quello che spendi ogni mese per mille altre cose… e quello che ti costa vedere bene, ogni giorno, senza rinunce.
+  </div>
+  <div style="width:100%; max-width:420px; margin:0 auto 13px auto;">
+    <canvas id="confrontoChart" height="340"></canvas>
+  </div>
+  <div style="font-size:1.09rem; color:#014c96; background:#e7f6ff; padding:10px 15px 8px 15px; border-radius:7px; margin-bottom:13px; margin-top:9px;">
+    <b>Sai qual è il paradosso?</b> Per meno di quanto spendi ogni mese per la palestra, Sky, uno smartphone nuovo o una cena in famiglia, puoi avere la migliore tecnologia per la vista – ogni singolo giorno. <br>
+    E senza i nostri occhiali, <b>l'abbonamento a Sky sarebbe del tutto inutile!</b>
+  </div>
+  <div style="font-size:1.07rem; color:#1b3555; margin-bottom:0;">
+    <b>Legenda:</b>
+    <ul style="margin: 10px 0 0 15px; padding-left: 8px; color:#274a72; font-size:1.01em;">
+      <li><b>Occhiali progressivi premium:</b> costo totale diviso per i mesi di utilizzo scelti.</li>
+      <li><b>Impianto dentale:</b> considerati 2.000€ ogni 3 anni (cambierai impianto più volte nella vita, non uno solo!).</li>
+      <li><b>Apparecchio acustico:</b> 2.000€ di acquisto, 400€ di manutenzione e sostituzione ogni 5 anni.</li>
+      <li><b>Sky:</b> abbonamento standard da 39,90€/mese – e senza vedere bene, che te ne fai?</li>
+      <li><b>Palestra:</b> abbonamento medio mensile di 50€.</li>
+      <li><b>Uscita a cena in famiglia:</b> media di 140€ per una cena per quattro persone.</li>
+      <li><b>Smartphone:</b> 1.000€ ogni 2 anni per l’ultimo modello.</li>
+    </ul>
+  </div>
+  <div class="nav-btns" style="margin-top:18px;">
+    <button class="btn" onclick="prevStep()">Indietro</button>
+    <button class="btn" id="step7Next">Scopri la verità sulla tua scelta</button>
+  </div>
+</div>
+
+
+<div class="step" id="step8">
+<div id="conclusioneFinale" style="font-size:1.15rem; color:#014c96; font-weight:700; margin-bottom:14px;"></div>
+  <div style="background:#ffe18f; border-radius:12px; color:#222; font-weight:800; font-size:1.12rem; padding:16px 13px 14px 17px; margin:13px 0 17px 0; border:1px solid #ffe7b8;">
+    <div>Chi sceglie la qualità:</div>
+    <ol style="margin: 10px 0 10px 18px; font-size:1.13em;">
+      <li>vede meglio</li>
+      <li>ha una migliore qualità della vita</li>
+      <li>nel lungo termine risparmia</li>
+      <li>non torna più indietro</li>
+    </ol>
+    Scarica subito la <b>guida personalizzata all'occhiale perfetto per te</b>.<br>
+    All’interno troverai consigli esclusivi e la possibilità di fissare il tuo check-up specialistico.<br>
+    <span style="display:block; margin-top:11px; color:#b87000;">
+      Ogni occhiale è come un vestito su misura sartoriale, non potrai mai trovarlo nel cesto delle offerte!
+    </span>
+  </div>
+  <div class="nav-btns">
+    <button class="btn" onclick="prevStep()">Indietro</button>
+    <button class="btn" id="step8Next">Scarica la tua guida</button>
+  </div>
+</div>
+
+
+<!-- STEP 9: EMAIL -->
+<div class="step" id="step9">
+  <div class="final-cta">
+    Vuoi ricevere il tuo report personalizzato e una mini-guida gratuita alla scelta degli occhiali?<br><br>
+    <b>Lascia qui la tua mail</b>:
+  </div>
+  <input type="email" class="input-text" id="emailUtente" placeholder="La tua email..." style="margin-bottom:7px;">
+  <button class="btn" id="inviaReportBtn" disabled>Invia report via email</button>
+  <div id="reportMsg" style="margin-top:12px; color:#258621; font-weight:700; display:none;"></div>
+  <button class="btn" style="margin-top:19px;" onclick="window.location.reload()">Ricomincia il calcolatore</button>
+</div>
+
+
+<!-- Nuovo script PDF migliorato -->
+  <script>
+    const COLOR = { blu:'#014c96', arancio:'#f2994a', verde:'#27ae60', grigio: 60 };
+    const LOGO_URL = 'https://www.otticabianchispezia.it/wp-content/uploads/2023/08/logo-bianchi.png'; 
+
+
+    function drawHeading(doc, text, y, color) {
+      const L = 15;
+      doc.setFillColor(color);
+      doc.rect(L, y - 6, 180, 10, 'F');
+      doc.setFont('helvetica', 'bold').setFontSize(15).setTextColor('#FFFFFF');
+      doc.text(text, 105, y, { align: 'center' });
+      doc.setTextColor(COLOR.grigio);
+    }
+
+
+    function addLogo(doc) {
+      fetch(LOGO_URL)
+        .then(res => res.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onload = function () {
+            const logoBase64 = reader.result;
+            doc.addImage(logoBase64, 'PNG', 15, 12, 40, 20);
+            doc.setFont('helvetica', 'bold').setFontSize(16).setTextColor(COLOR.blu).text("Guida Personalizzata", 105, 40, { align: 'center' });
+            doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(COLOR.grigio).text("Ottica Bianchi – La Spezia", 105, 46, { align: 'center' });
+            doc.setFontSize(12).setTextColor(COLOR.grigio).text("La vista è il senso più importante.", 105, 54, { align: 'center' });
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch(() => {
+          doc.setFont('helvetica', 'bold').setFontSize(14).setTextColor(COLOR.blu).text("Ottica Bianchi", 15, 30);
+        });
+    }
+
+
+    const TIPO_LENTI = [
+      "Monofocale – una distanza: per vederci meglio da vicino o da lontano.",
+      "Office (da 40 cm a 4 m) – comfort lavoro: specifiche per l’uso al computer in ufficio.",
+      "Progressive – un occhiale solo: permettono di vedere bene sia da vicino, che a mezza distanza, che da lontano.",
+    ];
+
+
+    const TRATTAMENTI = [
+      "Fotocromatico – lente chiara indoor, scura al sole.",
+      "Polarizzato – taglia riverbero.",
+      "Antiriflesso – visione limpida.",
+      "Protezione UV 400 – scudo salute occhi.",
+    ];
+
+
+    function consigliLente(d) {
+      let titolo = '', extra = '', msg = '';
+      if (d.driveHours >= 1) {
+        titolo = d.eta >= 40 ? "DriveSafe Progressive" : "DriveSafe Monofocale";
+        extra = "Lenti Polarizzate AR interno";
+        msg = "Ottimizzata per la guida: maggiore contrasto, meno abbagliamento notturno.";
+      } else if (d.pcHours >= 4) {
+        titolo = "Office Lens Room (4m)";
+        extra = d.eta >= 40 ? "Progressive Digital Comfort" : "Monofocale Supporto Accomodativo";
+        msg = "Zona ampia schermo-scrivania-riunioni, postura naturale tutto il giorno.";
+      } else if (d.outdoorHours >= 3) {
+        titolo = "Photochromic Polarizzata UV400";
+        extra = "Lenti Solari Polarizzate AR interno";
+        msg = "Adatta alla luce variabile, elimina riflessi su acqua e asfalto.";
+      } else {
+        titolo = d.eta >= 40 ? "Progressive Everyday Premium" : "Monofocale Alta Definizione";
+        extra = "Clip-on magnetica polarizzata";
+        msg = "Visione nitida in ogni situazione con lenti leggere e antiriflesso.";
+      }
+      return { titolo, extra, msg };
+    }
+
+
+    function buildPdf(dati) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const L = 15, W = 180;
+
+
+      // Pagina 1 - Intestazione
+      addLogo(doc);
+
+
+      // Informazioni Utente
+      drawHeading(doc, "Informazioni Personali", 70, COLOR.blu);
+      doc.setFont('helvetica', 'normal').setFontSize(12).setTextColor(COLOR.grigio);
+      doc.text(`Nome: ${dati.nome}`, L, 80);
+      doc.text(`Età: ${dati.eta} anni`, L, 86);
+      doc.text(`Professione: ${dati.professione}`, L, 92);
+      doc.text(`Utilizzo principale: ${dati.profilo || 'Nessun dato'}`, L, 98);
+
+
+      // Calcolo costo
+      doc.setFont('helvetica', 'bold').setTextColor(COLOR.arancio);
+      doc.text("Costo giornaliero:", L, 110);
+      doc.setFont('helvetica', 'normal').setTextColor(COLOR.grigio);
+      doc.text(`€ ${document.getElementById('costoGiorno')?.textContent || '--'} al giorno`, L + 45, 110);
+
+
+      // Consiglio su misura
+      drawHeading(doc, "Consiglio per te", 125, COLOR.arancio);
+      const sug = consigliLente(dati);
+      doc.setFont('helvetica', 'bold').setFontSize(14).setTextColor(COLOR.verde).text(sug.titolo, L, 135);
+      doc.setFont('helvetica', 'normal').setFontSize(11).setTextColor(COLOR.grigio).text(sug.msg, L, 143);
+      doc.text(`Opzione alternativa: ${sug.extra}`, L, 150);
+
+
+      // Tipi di lenti
+      drawHeading(doc, "Tipi di Lenti", 165, COLOR.blu);
+      doc.setFontSize(11).setTextColor(COLOR.grigio).text(TIPO_LENTI, L, 173);
+
+
+      // Trattamenti
+      drawHeading(doc, "Trattamenti Disponibili", 205, COLOR.arancio);
+      doc.setFontSize(11).setTextColor(COLOR.grigio).text(TRATTAMENTI, L, 213);
+
+
+      doc.setFontSize(9).text("Pag. 1/2", 105, 290, { align: 'center' });
+
+
+      // Pagina 2 - Call to Action
+      doc.addPage();
+      drawHeading(doc, "Vuoi saperne di più?", 22, COLOR.blu);
+      doc.setFontSize(12).setTextColor(COLOR.grigio).text("Prenota subito il tuo check-up gratuito presso Ottica Bianchi.", L, 35);
+      doc.setFont('helvetica', 'bold').setTextColor(COLOR.verde).textWithLink("Clicca qui per WhatsApp", L, 50, { url: 'https://wa.me/390123456789?text=Ciao%20Ottica%20Bianchi,%20vorrei%20prenotare%20un%20check-up%20vista.' });
+      doc.setFont('helvetica', 'normal').setTextColor(COLOR.grigio).text("Oppure visita il nostro sito per orari e informazioni:", L, 60);
+      doc.textWithLink("www.otticabianchispezia.it", L, 68, { url: 'https://www.otticabianchispezia.it' });
+
+
+      doc.setFont('helvetica', 'bold').setFontSize(12).setTextColor(COLOR.blu).text("Orari Apertura", L, 90);
+      doc.setFont('helvetica', 'normal').setTextColor(COLOR.grigio).text([
+        "Lunedì Mattina: CHIUSO",
+        "Lunedì Pomeriggio: 15:30 - 19:30",
+        "Martedì - Sabato: 9:00 - 19:30"
+      ], L, 98);
+
+
+      doc.setFontSize(9).text("Pag. 2/2", 105, 290, { align: 'center' });
+
+
+      doc.save("Guida_Occhiali_Personalizzata.pdf");
+    }
+
+
+    document.getElementById('step8Next').addEventListener('click', e=>{
+      const dati = {
+        nome: document.getElementById('nome')?.value || 'Amico della vista',
+        eta: document.querySelector('input[name="eta"]:checked')?.value || '30',
+        profilo: document.querySelector('input[name="profilo"]:checked')?.value || '',
+        pcHours: 0,
+        outdoorHours: 0,
+        driveHours: 0,
+        professione: document.getElementById('professione')?.value || '',
+      };
+      buildPdf(dati);
+    });
+  </script>
+</body>
+</html>
